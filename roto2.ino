@@ -14,11 +14,51 @@
 #include <SerialFlash.h>
 
 // GUItool: begin automatically generated code
-AudioSynthWaveformSine   sine1;          //xy=220,60
-AudioOutputI2S           i2s1;           //xy=420,64
-AudioConnection          patchCord1(sine1, 0, i2s1, 0);
-AudioConnection          patchCord2(sine1, 0, i2s1, 1);
-AudioControlSGTL5000     audioShield;
+AudioSynthWaveformSine   sine1;          //xy=339,52
+AudioSynthWaveformSine   sine2;          //xy=339,88
+AudioSynthWaveformSine   sine3;          //xy=339,124
+AudioSynthWaveformSine   sine4;          //xy=340,174
+AudioSynthWaveformSine   sine5;          //xy=340,209
+AudioSynthWaveformSine   sine6;          //xy=340,244
+AudioSynthWaveformSine   sine7;          //xy=340,291
+AudioSynthWaveformSine   sine8;          //xy=341,327
+AudioSynthWaveformSine   sine9;         //xy=341,412
+AudioSynthWaveformSine   sine10;         //xy=341,483
+AudioSynthWaveformSine   sine11;          //xy=342,363
+AudioSynthWaveformSine   sine12;         //xy=342,447
+AudioMixer4              mixer1;         //xy=459,325
+AudioMixer4              mixer2;         //xy=461,90
+AudioMixer4              mixer3;         //xy=461,208
+AudioMixer4              mixer4;         //xy=461,444
+AudioEffectEnvelope      envelope1;      //xy=591,90
+AudioEffectEnvelope      envelope2;      //xy=591,208
+AudioEffectEnvelope      envelope3;      //xy=593,326
+AudioEffectEnvelope      envelope4;      //xy=596,444
+AudioMixer4              mixer5;         //xy=759,274
+AudioOutputI2S           i2s1;           //xy=887,273
+AudioConnection          patchCord1(sine1, 0, mixer1, 0);
+AudioConnection          patchCord2(sine2, 0, mixer1, 1);
+AudioConnection          patchCord3(sine3, 0, mixer1, 2);
+AudioConnection          patchCord4(sine4, 0, mixer2, 0);
+AudioConnection          patchCord5(sine5, 0, mixer2, 1);
+AudioConnection          patchCord6(sine6, 0, mixer2, 2);
+AudioConnection          patchCord7(sine7, 0, mixer3, 0);
+AudioConnection          patchCord8(sine8, 0, mixer3, 1);
+AudioConnection          patchCord9(sine9, 0, mixer3, 2);
+AudioConnection          patchCord10(sine10, 0, mixer4, 0);
+AudioConnection          patchCord11(sine11, 0, mixer4, 1);
+AudioConnection          patchCord12(sine12, 0, mixer4, 2);
+AudioConnection          patchCord13(mixer1, envelope1);
+AudioConnection          patchCord14(mixer2, envelope2);
+AudioConnection          patchCord15(mixer3, envelope3);
+AudioConnection          patchCord16(mixer4, envelope4);
+AudioConnection          patchCord17(envelope1, 0, mixer5, 0);
+AudioConnection          patchCord18(envelope2, 0, mixer5, 1);
+AudioConnection          patchCord19(envelope3, 0, mixer5, 2);
+AudioConnection          patchCord20(envelope4, 0, mixer5, 3);
+AudioConnection          patchCord21(mixer5, 0, i2s1, 0);
+AudioConnection          patchCord22(mixer5, 0, i2s1, 1);
+AudioControlSGTL5000     audioShield;     //xy=132,494
 // GUItool: end automatically generated code
 
 void setup() {
@@ -26,11 +66,13 @@ void setup() {
 
   AudioMemory(8);
   audioShield.enable();
-  audioShield.volume(0.45);
+  audioShield.volume(0.5);
 
-  sine1.frequency(220);
-  sine1.amplitude(0.4);
-  
+  initVoice(1);
+  initVoice(2);
+  initVoice(3);
+  initVoice(4);
+
   usbMIDI.setHandleNoteOff(OnNoteOff);
   usbMIDI.setHandleNoteOn(OnNoteOn);
   usbMIDI.setHandleVelocityChange(OnVelocityChange);
@@ -44,6 +86,105 @@ void loop() {
   usbMIDI.read(); // USB MIDI receive
 }
 
+void initVoice(byte voice) {
+  switch (voice) {
+    case 1:
+      initSine(&sine1);
+      initSine(&sine2);
+      initSine(&sine3);
+      initEnvelope(&envelope1);
+      initMixer(&mixer1);
+      break;
+    case 2:
+      initSine(&sine4);
+      initSine(&sine5);
+      initSine(&sine6);
+      initEnvelope(&envelope2);
+      initMixer(&mixer2);
+      break;
+    case 3:
+      initSine(&sine7);
+      initSine(&sine8);
+      initSine(&sine9);
+      initEnvelope(&envelope3);
+      initMixer(&mixer3);
+      break;
+    case 4:
+      initSine(&sine10);
+      initSine(&sine11);
+      initSine(&sine12);
+      initEnvelope(&envelope4);
+      initMixer(&mixer4);
+      break;
+  }
+}
+
+void initSine(AudioSynthWaveformSine *sine) {
+  sine->amplitude(1.0);
+}
+
+void initEnvelope(AudioEffectEnvelope *env) {
+  env->attack(0.2);
+  env->sustain(1.0);
+  env->release(0.1);
+}
+
+void initMixer(AudioMixer4 *mix) {
+  mix->gain(0, 0.083);
+  mix->gain(1, 0.083);
+  mix->gain(2, 0.083);
+  mix->gain(3, 0);
+}
+
+byte inuse;
+byte voices[127];
+
+byte findVoice() {
+  if (inuse != 0xFF) {
+    for (int i=0; i<4; i++) {
+      byte pos = 1<<i;
+      if ((inuse & pos) == 0) {
+        return i+1;
+      }
+    }
+  }
+
+  // Lowest notes have priority for now.
+  for (byte i=127; i>=0; i--) {
+    if (voices[i] != 0) {
+      returnVoice(i);
+      return i;
+    }
+  }
+}
+
+byte allocateVoice(byte note) {
+  byte voice = findVoice();
+  
+  inuse |= (1 << (voice-1));
+
+  Serial.print("Voice=");
+  Serial.print(voice);
+  Serial.print(", inuse=");
+  Serial.print(inuse);
+  Serial.println();
+  
+  voices[note] = voice;
+  return voice;
+}
+
+void returnVoice(byte note) {
+  byte voice = voices[note];
+  inuse &= ~(1 << (voice-1)); 
+
+  Serial.print("Voice=");
+  Serial.print(voice);
+  Serial.print(", inuse=");
+  Serial.print(inuse);
+  Serial.println();
+  
+  voices[note] = 0;
+}
 
 void OnNoteOn(byte channel, byte note, byte velocity) {
   Serial.print("Note On, ch=");
@@ -54,8 +195,35 @@ void OnNoteOn(byte channel, byte note, byte velocity) {
   Serial.print(velocity, DEC);
   Serial.println();
 
-  sine1.frequency(note2freq(note));
-  sine1.amplitude(0.5);
+  byte voice = allocateVoice(note);
+  float fund = note2freq(note);
+  
+  switch (voice) {
+    case 1:
+      sine1.frequency(fund);
+      sine2.frequency(fund * 0.5);
+      sine3.frequency(fund * 1.5);
+      envelope1.noteOn();
+      break;
+    case 2:
+      sine4.frequency(fund);
+      sine5.frequency(fund * 0.5);
+      sine6.frequency(fund * 1.5);
+      envelope2.noteOn();
+      break;
+    case 3:
+      sine7.frequency(fund);
+      sine8.frequency(fund * 0.5);
+      sine9.frequency(fund * 1.5);
+      envelope3.noteOn();
+      break;
+    case 4:
+      sine10.frequency(fund);
+      sine11.frequency(fund * 0.5);
+      sine12.frequency(fund * 1.5);
+      envelope3.noteOn();
+      break;
+  }
 }
 
 void OnNoteOff(byte channel, byte note, byte velocity) {
@@ -67,7 +235,25 @@ void OnNoteOff(byte channel, byte note, byte velocity) {
   Serial.print(velocity, DEC);
   Serial.println();
 
-  sine1.amplitude(0);
+  byte voice = voices[note];
+  switch (voice) {
+    case 1:
+      envelope1.noteOff();
+      returnVoice(note);
+      break;
+    case 2:
+      envelope2.noteOff();
+      returnVoice(note);
+      break;
+    case 3:
+      envelope3.noteOff();
+      returnVoice(note);
+      break;
+    case 4:
+      envelope4.noteOff();
+      returnVoice(note);
+      break;
+  }
 }
 
 void OnVelocityChange(byte channel, byte note, byte velocity) {
