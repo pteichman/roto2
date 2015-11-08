@@ -26,6 +26,10 @@ AudioSynthWaveformSine   sine9;         //xy=341,412
 AudioSynthWaveformSine   sine10;         //xy=341,483
 AudioSynthWaveformSine   sine11;          //xy=342,363
 AudioSynthWaveformSine   sine12;         //xy=342,447
+AudioSynthWaveformSine   sine13;         //xy=342,447
+AudioSynthWaveformSine   sine14;         //xy=342,447
+AudioSynthWaveformSine   sine15;         //xy=342,447
+AudioSynthWaveformSine   sine16;         //xy=342,447
 AudioMixer4              mixer1;         //xy=459,325
 AudioMixer4              mixer2;         //xy=461,90
 AudioMixer4              mixer3;         //xy=461,208
@@ -39,25 +43,29 @@ AudioOutputI2S           i2s1;           //xy=887,273
 AudioConnection          patchCord1(sine1, 0, mixer1, 0);
 AudioConnection          patchCord2(sine2, 0, mixer1, 1);
 AudioConnection          patchCord3(sine3, 0, mixer1, 2);
-AudioConnection          patchCord4(sine4, 0, mixer2, 0);
-AudioConnection          patchCord5(sine5, 0, mixer2, 1);
-AudioConnection          patchCord6(sine6, 0, mixer2, 2);
-AudioConnection          patchCord7(sine7, 0, mixer3, 0);
-AudioConnection          patchCord8(sine8, 0, mixer3, 1);
-AudioConnection          patchCord9(sine9, 0, mixer3, 2);
-AudioConnection          patchCord10(sine10, 0, mixer4, 0);
-AudioConnection          patchCord11(sine11, 0, mixer4, 1);
-AudioConnection          patchCord12(sine12, 0, mixer4, 2);
-AudioConnection          patchCord13(mixer1, envelope1);
-AudioConnection          patchCord14(mixer2, envelope2);
-AudioConnection          patchCord15(mixer3, envelope3);
-AudioConnection          patchCord16(mixer4, envelope4);
-AudioConnection          patchCord17(envelope1, 0, mixer5, 0);
-AudioConnection          patchCord18(envelope2, 0, mixer5, 1);
-AudioConnection          patchCord19(envelope3, 0, mixer5, 2);
-AudioConnection          patchCord20(envelope4, 0, mixer5, 3);
-AudioConnection          patchCord21(mixer5, 0, i2s1, 0);
-AudioConnection          patchCord22(mixer5, 0, i2s1, 1);
+AudioConnection          patchCord4(sine4, 0, mixer1, 3);
+AudioConnection          patchCord5(sine5, 0, mixer2, 0);
+AudioConnection          patchCord6(sine6, 0, mixer2, 1);
+AudioConnection          patchCord7(sine7, 0, mixer2, 2);
+AudioConnection          patchCord8(sine8, 0, mixer2, 3);
+AudioConnection          patchCord9(sine9, 0, mixer3, 0);
+AudioConnection          patchCord10(sine10, 0, mixer3, 1);
+AudioConnection          patchCord11(sine11, 0, mixer3, 2);
+AudioConnection          patchCord12(sine12, 0, mixer3, 3);
+AudioConnection          patchCord13(sine13, 0, mixer4, 0);
+AudioConnection          patchCord14(sine14, 0, mixer4, 1);
+AudioConnection          patchCord15(sine15, 0, mixer4, 2);
+AudioConnection          patchCord16(sine16, 0, mixer4, 3);
+AudioConnection          patchCord17(mixer1, envelope1);
+AudioConnection          patchCord18(mixer2, envelope2);
+AudioConnection          patchCord19(mixer3, envelope3);
+AudioConnection          patchCord20(mixer4, envelope4);
+AudioConnection          patchCord21(envelope1, 0, mixer5, 0);
+AudioConnection          patchCord22(envelope2, 0, mixer5, 1);
+AudioConnection          patchCord23(envelope3, 0, mixer5, 2);
+AudioConnection          patchCord24(envelope4, 0, mixer5, 3);
+AudioConnection          patchCord25(mixer5, 0, i2s1, 0);
+AudioConnection          patchCord26(mixer5, 0, i2s1, 1);
 AudioControlSGTL5000     audioShield;     //xy=132,494
 // GUItool: end automatically generated code
 
@@ -92,27 +100,31 @@ void initVoice(byte voice) {
       initSine(&sine1);
       initSine(&sine2);
       initSine(&sine3);
+      initSine(&sine4);
       initEnvelope(&envelope1);
       initMixer(&mixer1);
       break;
     case 2:
-      initSine(&sine4);
       initSine(&sine5);
       initSine(&sine6);
+      initSine(&sine7);
+      initSine(&sine8);
       initEnvelope(&envelope2);
       initMixer(&mixer2);
       break;
     case 3:
-      initSine(&sine7);
-      initSine(&sine8);
       initSine(&sine9);
+      initSine(&sine10);
+      initSine(&sine11);
+      initSine(&sine12);
       initEnvelope(&envelope3);
       initMixer(&mixer3);
       break;
     case 4:
-      initSine(&sine10);
-      initSine(&sine11);
-      initSine(&sine12);
+      initSine(&sine13);
+      initSine(&sine14);
+      initSine(&sine15);
+      initSine(&sine16);
       initEnvelope(&envelope4);
       initMixer(&mixer4);
       break;
@@ -124,16 +136,16 @@ void initSine(AudioSynthWaveformSine *sine) {
 }
 
 void initEnvelope(AudioEffectEnvelope *env) {
-  env->attack(0.2);
+  env->attack(0.5);
   env->sustain(1.0);
-  env->release(0.1);
+  env->release(0.75);
 }
 
 void initMixer(AudioMixer4 *mix) {
-  mix->gain(0, 0.083);
-  mix->gain(1, 0.083);
-  mix->gain(2, 0.083);
-  mix->gain(3, 0);
+  mix->gain(0, 0.0625);
+  mix->gain(1, 0.0625);
+  mix->gain(2, 0.0625);
+  mix->gain(3, 0.0625);
 }
 
 byte inuse;
@@ -203,24 +215,28 @@ void OnNoteOn(byte channel, byte note, byte velocity) {
       sine1.frequency(fund);
       sine2.frequency(fund * 0.5);
       sine3.frequency(fund * 1.5);
+      sine4.frequency(fund * 2.0);
       envelope1.noteOn();
       break;
     case 2:
-      sine4.frequency(fund);
-      sine5.frequency(fund * 0.5);
-      sine6.frequency(fund * 1.5);
+      sine5.frequency(fund);
+      sine6.frequency(fund * 0.5);
+      sine7.frequency(fund * 1.5);
+      sine8.frequency(fund * 2.0);
       envelope2.noteOn();
       break;
     case 3:
-      sine7.frequency(fund);
-      sine8.frequency(fund * 0.5);
-      sine9.frequency(fund * 1.5);
+      sine9.frequency(fund);
+      sine10.frequency(fund * 0.5);
+      sine11.frequency(fund * 1.5);
+      sine12.frequency(fund * 2.0);
       envelope3.noteOn();
       break;
     case 4:
-      sine10.frequency(fund);
-      sine11.frequency(fund * 0.5);
-      sine12.frequency(fund * 1.5);
+      sine13.frequency(fund);
+      sine14.frequency(fund * 0.5);
+      sine15.frequency(fund * 1.5);
+      sine16.frequency(fund * 2.0);
       envelope3.noteOn();
       break;
   }
