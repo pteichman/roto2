@@ -136,9 +136,9 @@ void initSine(AudioSynthWaveformSine *sine) {
 }
 
 void initEnvelope(AudioEffectEnvelope *env) {
-  env->attack(0.5);
+  env->attack(2.0);
   env->sustain(1.0);
-  env->release(0.75);
+  env->release(2.0);
 }
 
 void initMixer(AudioMixer4 *mix) {
