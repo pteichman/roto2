@@ -72,7 +72,7 @@ AudioControlSGTL5000     audioShield;     //xy=132,494
 void setup() {
   Serial.begin(115200);
 
-  AudioMemory(8);
+  AudioMemory(20);
   audioShield.enable();
   audioShield.volume(0.5);
 
@@ -237,7 +237,7 @@ void OnNoteOn(byte channel, byte note, byte velocity) {
       sine14.frequency(fund * 0.5);
       sine15.frequency(fund * 1.5);
       sine16.frequency(fund * 2.0);
-      envelope3.noteOn();
+      envelope4.noteOn();
       break;
   }
 }
