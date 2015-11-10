@@ -1,17 +1,12 @@
-/* Print Incoming Message USB MIDI Example
-   Use the Arduino Serial Monitor to view the messages
-   as Teensy receives them by USB MIDI
-
-   You must select MIDI from the "Tools > USB Type" menu
-
-   This example code is in the public domain.
-*/
+// Copyright (c) 2015 Peter Teichman
 
 #include <Audio.h>
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
 #include <SerialFlash.h>
+
+#include "voice_allocator.h"
 
 // GUItool: begin automatically generated code
 AudioSynthWaveformSine   sine1;          //xy=339,52
@@ -69,6 +64,8 @@ AudioConnection          patchCord26(mixer5, 0, i2s1, 1);
 AudioControlSGTL5000     audioShield;     //xy=132,494
 // GUItool: end automatically generated code
 
+VoiceAllocator voices;
+
 void setup() {
   Serial.begin(115200);
 
@@ -76,6 +73,7 @@ void setup() {
   audioShield.enable();
   audioShield.volume(0.5);
 
+  voices.Init();
   initVoice(1);
   initVoice(2);
   initVoice(3);
@@ -148,56 +146,6 @@ void initMixer(AudioMixer4 *mix) {
   mix->gain(3, 0.0625);
 }
 
-byte inuse;
-byte voices[127];
-
-byte findVoice() {
-  if (inuse != 0xFF) {
-    for (int i=0; i<4; i++) {
-      byte pos = 1<<i;
-      if ((inuse & pos) == 0) {
-        return i+1;
-      }
-    }
-  }
-
-  // Lowest notes have priority for now.
-  for (byte i=127; i>=0; i--) {
-    if (voices[i] != 0) {
-      returnVoice(i);
-      return i;
-    }
-  }
-}
-
-byte allocateVoice(byte note) {
-  byte voice = findVoice();
-  
-  inuse |= (1 << (voice-1));
-
-  Serial.print("Voice=");
-  Serial.print(voice);
-  Serial.print(", inuse=");
-  Serial.print(inuse);
-  Serial.println();
-  
-  voices[note] = voice;
-  return voice;
-}
-
-void returnVoice(byte note) {
-  byte voice = voices[note];
-  inuse &= ~(1 << (voice-1)); 
-
-  Serial.print("Voice=");
-  Serial.print(voice);
-  Serial.print(", inuse=");
-  Serial.print(inuse);
-  Serial.println();
-  
-  voices[note] = 0;
-}
-
 void OnNoteOn(byte channel, byte note, byte velocity) {
   Serial.print("Note On, ch=");
   Serial.print(channel, DEC);
@@ -207,32 +155,32 @@ void OnNoteOn(byte channel, byte note, byte velocity) {
   Serial.print(velocity, DEC);
   Serial.println();
 
-  byte voice = allocateVoice(note);
+  voice_t voice = voices.NoteOn(note);
   float fund = note2freq(note);
   
   switch (voice) {
-    case 1:
+    case 0:
       sine1.frequency(fund);
       sine2.frequency(fund * 0.5);
       sine3.frequency(fund * 1.5);
       sine4.frequency(fund * 2.0);
       envelope1.noteOn();
       break;
-    case 2:
+    case 1:
       sine5.frequency(fund);
       sine6.frequency(fund * 0.5);
       sine7.frequency(fund * 1.5);
       sine8.frequency(fund * 2.0);
       envelope2.noteOn();
       break;
-    case 3:
+    case 2:
       sine9.frequency(fund);
       sine10.frequency(fund * 0.5);
       sine11.frequency(fund * 1.5);
       sine12.frequency(fund * 2.0);
       envelope3.noteOn();
       break;
-    case 4:
+    case 3:
       sine13.frequency(fund);
       sine14.frequency(fund * 0.5);
       sine15.frequency(fund * 1.5);
@@ -251,23 +199,19 @@ void OnNoteOff(byte channel, byte note, byte velocity) {
   Serial.print(velocity, DEC);
   Serial.println();
 
-  byte voice = voices[note];
+  voice_t voice = voices.NoteOff(note);
   switch (voice) {
-    case 1:
+    case 0:
       envelope1.noteOff();
-      returnVoice(note);
+      break;
+    case 1:
+      envelope2.noteOff();
       break;
     case 2:
-      envelope2.noteOff();
-      returnVoice(note);
+      envelope3.noteOff();
       break;
     case 3:
-      envelope3.noteOff();
-      returnVoice(note);
-      break;
-    case 4:
       envelope4.noteOff();
-      returnVoice(note);
       break;
   }
 }
