@@ -36,170 +36,170 @@ AudioControlSGTL5000     audioShield;     //xy=132,494
 VoiceAllocator voices;
 
 void setup() {
-  Serial.begin(115200);
+    Serial.begin(115200);
 
-  AudioMemory(20);
-  audioShield.enable();
-  audioShield.volume(0.5);
+    AudioMemory(20);
+    audioShield.enable();
+    audioShield.volume(0.5);
 
-  voices.Init();
-  initVoice(1);
-  initVoice(2);
-  initVoice(3);
-  initVoice(4);
+    voices.Init();
+    initVoice(1);
+    initVoice(2);
+    initVoice(3);
+    initVoice(4);
 
-  mixer5.gain(0, 0.25);
-  mixer5.gain(1, 0.25);
-  mixer5.gain(2, 0.25);
-  mixer5.gain(3, 0.25);
+    mixer5.gain(0, 0.25);
+    mixer5.gain(1, 0.25);
+    mixer5.gain(2, 0.25);
+    mixer5.gain(3, 0.25);
 
-  usbMIDI.setHandleNoteOff(OnNoteOff);
-  usbMIDI.setHandleNoteOn(OnNoteOn);
-  usbMIDI.setHandleVelocityChange(OnVelocityChange);
-  usbMIDI.setHandleControlChange(OnControlChange);
-  usbMIDI.setHandleProgramChange(OnProgramChange);
-  usbMIDI.setHandleAfterTouch(OnAfterTouch);
-  usbMIDI.setHandlePitchChange(OnPitchChange);
+    usbMIDI.setHandleNoteOff(OnNoteOff);
+    usbMIDI.setHandleNoteOn(OnNoteOn);
+    usbMIDI.setHandleVelocityChange(OnVelocityChange);
+    usbMIDI.setHandleControlChange(OnControlChange);
+    usbMIDI.setHandleProgramChange(OnProgramChange);
+    usbMIDI.setHandleAfterTouch(OnAfterTouch);
+    usbMIDI.setHandlePitchChange(OnPitchChange);
 }
 
 void loop() {
-  usbMIDI.read(); // USB MIDI receive
+    usbMIDI.read(); // USB MIDI receive
 }
 
 void initVoice(byte voice) {
-  switch (voice) {
+    switch (voice) {
     case 1:
-      osc1.Init();
-      osc1.Amplitude(1.0);
-      initEnvelope(&envelope1);
-      break;
+        osc1.Init();
+        osc1.Amplitude(1.0);
+        initEnvelope(&envelope1);
+        break;
     case 2:
-      osc2.Init();
-      osc2.Amplitude(1.0);
-      initEnvelope(&envelope2);
-      break;
+        osc2.Init();
+        osc2.Amplitude(1.0);
+        initEnvelope(&envelope2);
+        break;
     case 3:
-      osc3.Init();
-      osc3.Amplitude(1.0);
-      initEnvelope(&envelope3);
-      break;
+        osc3.Init();
+        osc3.Amplitude(1.0);
+        initEnvelope(&envelope3);
+        break;
     case 4:
-      osc4.Init();
-      osc4.Amplitude(1.0);
-      initEnvelope(&envelope4);
-      break;
-  }
+        osc4.Init();
+        osc4.Amplitude(1.0);
+        initEnvelope(&envelope4);
+        break;
+    }
 }
 
 void initEnvelope(AudioEffectEnvelope *env) {
-  env->attack(2.0);
-  env->sustain(1.0);
-  env->release(2.0);
+    env->attack(2.0);
+    env->sustain(1.0);
+    env->release(2.0);
 }
 
 void OnNoteOn(byte channel, byte note, byte velocity) {
-  Serial.print("Note On, ch=");
-  Serial.print(channel, DEC);
-  Serial.print(", note=");
-  Serial.print(note, DEC);
-  Serial.print(", velocity=");
-  Serial.print(velocity, DEC);
-  Serial.println();
+    Serial.print("Note On, ch=");
+    Serial.print(channel, DEC);
+    Serial.print(", note=");
+    Serial.print(note, DEC);
+    Serial.print(", velocity=");
+    Serial.print(velocity, DEC);
+    Serial.println();
 
-  voice_t voice = voices.NoteOn(note);
-  float fund = note2freq(note);
+    voice_t voice = voices.NoteOn(note);
+    float fund = note2freq(note);
   
-  switch (voice) {
+    switch (voice) {
     case 0:
-      osc1.Fundamental(fund);
-      envelope1.noteOn();
-      break;
+        osc1.Fundamental(fund);
+        envelope1.noteOn();
+        break;
     case 1:
-      osc2.Fundamental(fund);
-      envelope2.noteOn();
-      break;
+        osc2.Fundamental(fund);
+        envelope2.noteOn();
+        break;
     case 3:
-      osc3.Fundamental(fund);
-      envelope3.noteOn();
-      break;
+        osc3.Fundamental(fund);
+        envelope3.noteOn();
+        break;
     case 4:
-      osc4.Fundamental(fund);
-      envelope4.noteOn();
-      break;
-  }
+        osc4.Fundamental(fund);
+        envelope4.noteOn();
+        break;
+    }
 }
 
 void OnNoteOff(byte channel, byte note, byte velocity) {
-  Serial.print("Note Off, ch=");
-  Serial.print(channel, DEC);
-  Serial.print(", note=");
-  Serial.print(note, DEC);
-  Serial.print(", velocity=");
-  Serial.print(velocity, DEC);
-  Serial.println();
+    Serial.print("Note Off, ch=");
+    Serial.print(channel, DEC);
+    Serial.print(", note=");
+    Serial.print(note, DEC);
+    Serial.print(", velocity=");
+    Serial.print(velocity, DEC);
+    Serial.println();
 
-  voice_t voice = voices.NoteOff(note);
-  switch (voice) {
+    voice_t voice = voices.NoteOff(note);
+    switch (voice) {
     case 0:
-      envelope1.noteOff();
-      break;
+        envelope1.noteOff();
+        break;
     case 1:
-      envelope2.noteOff();
-      break;
+        envelope2.noteOff();
+        break;
     case 2:
-      envelope3.noteOff();
-      break;
+        envelope3.noteOff();
+        break;
     case 3:
-      envelope4.noteOff();
-      break;
-  }
+        envelope4.noteOff();
+        break;
+    }
 }
 
 void OnVelocityChange(byte channel, byte note, byte velocity) {
-  Serial.print("Velocity Change, ch=");
-  Serial.print(channel, DEC);
-  Serial.print(", note=");
-  Serial.print(note, DEC);
-  Serial.print(", velocity=");
-  Serial.print(velocity, DEC);
-  Serial.println();
+    Serial.print("Velocity Change, ch=");
+    Serial.print(channel, DEC);
+    Serial.print(", note=");
+    Serial.print(note, DEC);
+    Serial.print(", velocity=");
+    Serial.print(velocity, DEC);
+    Serial.println();
 }
 
 void OnControlChange(byte channel, byte control, byte value) {
-  Serial.print("Control Change, ch=");
-  Serial.print(channel, DEC);
-  Serial.print(", control=");
-  Serial.print(control, DEC);
-  Serial.print(", value=");
-  Serial.print(value, DEC);
-  Serial.println();
+    Serial.print("Control Change, ch=");
+    Serial.print(channel, DEC);
+    Serial.print(", control=");
+    Serial.print(control, DEC);
+    Serial.print(", value=");
+    Serial.print(value, DEC);
+    Serial.println();
 }
 
 void OnProgramChange(byte channel, byte program) {
-  Serial.print("Program Change, ch=");
-  Serial.print(channel, DEC);
-  Serial.print(", program=");
-  Serial.print(program, DEC);
-  Serial.println();
+    Serial.print("Program Change, ch=");
+    Serial.print(channel, DEC);
+    Serial.print(", program=");
+    Serial.print(program, DEC);
+    Serial.println();
 }
 
 void OnAfterTouch(byte channel, byte pressure) {
-  Serial.print("After Touch, ch=");
-  Serial.print(channel, DEC);
-  Serial.print(", pressure=");
-  Serial.print(pressure, DEC);
-  Serial.println();
+    Serial.print("After Touch, ch=");
+    Serial.print(channel, DEC);
+    Serial.print(", pressure=");
+    Serial.print(pressure, DEC);
+    Serial.println();
 }
 
 void OnPitchChange(byte channel, int pitch) {
-  Serial.print("Pitch Change, ch=");
-  Serial.print(channel, DEC);
-  Serial.print(", pitch=");
-  Serial.print(pitch, DEC);
-  Serial.println();
+    Serial.print("Pitch Change, ch=");
+    Serial.print(channel, DEC);
+    Serial.print(", pitch=");
+    Serial.print(pitch, DEC);
+    Serial.println();
 }
 
 float note2freq(byte note) {
-  float tmp = (note-69) / 12.0;
-  return 440.0 * pow(2.0, tmp);
+    float tmp = (note-69) / 12.0;
+    return 440.0 * pow(2.0, tmp);
 }
