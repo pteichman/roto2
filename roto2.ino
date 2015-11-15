@@ -18,18 +18,24 @@ AudioEffectEnvelope      envelope1;      //xy=591,90
 AudioEffectEnvelope      envelope2;      //xy=591,208
 AudioEffectEnvelope      envelope3;      //xy=593,326
 AudioEffectEnvelope      envelope4;      //xy=596,444
-AudioMixer4              mixer5;         //xy=759,274
+AudioSynthWaveformSine   perc;
+AudioEffectEnvelope      percEnvelope;
+AudioMixer4              mixer1;
+AudioMixer4              mixer2;
 AudioOutputI2S           i2s1;           //xy=887,273
 AudioConnection          patchCord17(osc1, envelope1);
 AudioConnection          patchCord18(osc2, envelope2);
 AudioConnection          patchCord19(osc3, envelope3);
 AudioConnection          patchCord20(osc4, envelope4);
-AudioConnection          patchCord21(envelope1, 0, mixer5, 0);
-AudioConnection          patchCord22(envelope2, 0, mixer5, 1);
-AudioConnection          patchCord23(envelope3, 0, mixer5, 2);
-AudioConnection          patchCord24(envelope4, 0, mixer5, 3);
-AudioConnection          patchCord25(mixer5, 0, i2s1, 0);
-AudioConnection          patchCord26(mixer5, 0, i2s1, 1);
+AudioConnection          patchCord21(perc, percEnvelope);
+AudioConnection          patchCord22(envelope1, 0, mixer1, 0);
+AudioConnection          patchCord23(envelope2, 0, mixer1, 1);
+AudioConnection          patchCord24(envelope3, 0, mixer1, 2);
+AudioConnection          patchCord25(envelope4, 0, mixer1, 3);
+AudioConnection          patchCord26(mixer1, 0, mixer2, 0);
+AudioConnection          patchCord27(percEnvelope, 0, mixer2, 1);
+AudioConnection          patchCord28(mixer2, 0, i2s1, 0);
+AudioConnection          patchCord29(mixer2, 0, i2s1, 1);
 AudioControlSGTL5000     audioShield;     //xy=132,494
 // GUItool: end automatically generated code
 
@@ -49,10 +55,20 @@ void setup() {
     initVoice(3);
 
     osc1.AllDrawbars(0x888800000);
-    mixer5.gain(0, 0.25);
-    mixer5.gain(1, 0.25);
-    mixer5.gain(2, 0.25);
-    mixer5.gain(3, 0.25);
+    mixer1.gain(0, 0.25);
+    mixer1.gain(1, 0.25);
+    mixer1.gain(2, 0.25);
+    mixer1.gain(3, 0.25);
+
+    perc.frequency(440.0);
+    perc.amplitude(1.0);
+    percEnvelope.attack(5.0);
+    percEnvelope.sustain(0.0);
+    percEnvelope.decay(40.0);
+    percEnvelope.release(5.0);
+
+    mixer2.gain(0, 0.5);
+    mixer2.gain(1, 0.0625);
 
     usbMIDI.setHandleNoteOff(OnNoteOff);
     usbMIDI.setHandleNoteOn(OnNoteOn);
@@ -103,9 +119,18 @@ void OnNoteOn(byte channel, byte note, byte velocity) {
     Serial.print(velocity, DEC);
     Serial.println();
 
-    voice_t voice = voices.NoteOn(note);
     float fund = note2freq(note);
+
+    Serial.print(voices.Available(), DEC);
+    if (voices.Available() == kNumVoices) {
+        perc.frequency(2*fund);
+        // Compensate for frequency response: normalize to highest MIDI freq.
+        perc.amplitude(log2(4186.0)/log2(fund));
+        percEnvelope.noteOn();
+    }
   
+    voice_t voice = voices.NoteOn(note);
+
     switch (voice) {
     case 0:
         osc1.Fundamental(fund);

@@ -27,6 +27,16 @@ class VoiceAllocator
     // Release note, return the voice it was on.
     voice_t NoteOff(uint8_t note);
 
+    int Available() {
+        int ret = 0;
+        for (int i=0; i<kNumVoices; i++) {
+            if (voices_[i] == kNoVoice) {
+                ret++;
+            }
+        }
+        return ret;
+    }
+
  private:
     voice_t voices_[kNumVoices];
     uint8_t lru_[kNumVoices];
