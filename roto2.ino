@@ -40,14 +40,15 @@ void setup() {
 
     AudioMemory(20);
     audioShield.enable();
-    audioShield.volume(0.5);
+    audioShield.volume(0.7);
 
     voices.Init();
+    initVoice(0);
     initVoice(1);
     initVoice(2);
     initVoice(3);
-    initVoice(4);
 
+    osc1.AllDrawbars(0x888800000);
     mixer5.gain(0, 0.25);
     mixer5.gain(1, 0.25);
     mixer5.gain(2, 0.25);
@@ -68,24 +69,20 @@ void loop() {
 
 void initVoice(byte voice) {
     switch (voice) {
-    case 1:
-        osc1.Init();
-        osc1.Amplitude(1.0);
+    case 0:
+        osc1.Begin(0.0, 1.0, 0x000000000);
         initEnvelope(&envelope1);
         break;
-    case 2:
-        osc2.Init();
-        osc2.Amplitude(1.0);
+    case 1:
+        osc2.Begin(0.0, 1.0, 0x000000000);
         initEnvelope(&envelope2);
         break;
-    case 3:
-        osc3.Init();
-        osc3.Amplitude(1.0);
+    case 2:
+        osc3.Begin(0.0, 1.0, 0x000000000);
         initEnvelope(&envelope3);
         break;
-    case 4:
-        osc4.Init();
-        osc4.Amplitude(1.0);
+    case 3:
+        osc4.Begin(0.0, 1.0, 0x000000000);
         initEnvelope(&envelope4);
         break;
     }
@@ -118,11 +115,11 @@ void OnNoteOn(byte channel, byte note, byte velocity) {
         osc2.Fundamental(fund);
         envelope2.noteOn();
         break;
-    case 3:
+    case 2:
         osc3.Fundamental(fund);
         envelope3.noteOn();
         break;
-    case 4:
+    case 3:
         osc4.Fundamental(fund);
         envelope4.noteOn();
         break;
@@ -173,6 +170,12 @@ void OnControlChange(byte channel, byte control, byte value) {
     Serial.print(", value=");
     Serial.print(value, DEC);
     Serial.println();
+
+    if (control >= 16 && control < 25) {
+        int drawbar = control - 16;
+        float val = (float)value / 127.0;
+        osc1.Drawbar(drawbar, val);
+    }
 }
 
 void OnProgramChange(byte channel, byte program) {

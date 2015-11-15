@@ -3,6 +3,7 @@
 #include "drawbar_osc.h"
 
 int16_t DrawbarWave[DRAWBAR_WAVETABLE_LENGTH+1];
+int32_t Buf[DRAWBAR_WAVETABLE_LENGTH+1];
 
 inline int16_t interpolate(int16_t v1, int16_t v2, uint32_t scale) {
     v1 *= 0xFFFF - scale;
@@ -51,6 +52,48 @@ void DrawbarOsc::update(void) {
 }
 
 void DrawbarOsc::Rebuild(void) {
-  
-}
+    // Accumulating 24 bits per drawbar, then they add to get four more.
+    // So shift 12 at the end to get back to 16 bits.
 
+    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
+        Buf[i] = AudioWaveformSine[i/3 & 0xff] * drawbars[0];
+    }
+
+    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
+        Buf[i] += AudioWaveformSine[(2*i)/3 & 0xff] * drawbars[1];
+    }
+
+    // Three cycles of the fundamental frequency.
+    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
+        Buf[i] += AudioWaveformSine[i & 0xff] * drawbars[2];
+    }
+
+    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
+        Buf[i] += AudioWaveformSine[2*i & 0xff] * drawbars[3];
+    }
+
+    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
+        Buf[i] += AudioWaveformSine[3*i & 0xff] * drawbars[4];
+    }
+
+    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
+        Buf[i] += AudioWaveformSine[4*i & 0xff] * drawbars[5];
+    }
+
+    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
+        Buf[i] += AudioWaveformSine[5*i & 0xff] * drawbars[6];
+    }
+
+    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
+        Buf[i] += AudioWaveformSine[6*i & 0xff] * drawbars[7];
+    }
+
+    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
+        Buf[i] += AudioWaveformSine[8*i & 0xff] * drawbars[8];
+    }
+
+    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
+        DrawbarWave[i] = Buf[i] >> 12;
+    }
+    DrawbarWave[DRAWBAR_WAVETABLE_LENGTH] = DrawbarWave[0];
+}
