@@ -60,12 +60,9 @@ void setup() {
     mixer1.gain(2, 0.25);
     mixer1.gain(3, 0.25);
 
-    perc.frequency(440.0);
-    perc.amplitude(1.0);
-    percEnvelope.attack(5.0);
+    percEnvelope.attack(10.0);
     percEnvelope.sustain(0.0);
-    percEnvelope.decay(40.0);
-    percEnvelope.release(5.0);
+    percEnvelope.decay(80.0);
 
     mixer2.gain(0, 0.5);
     mixer2.gain(1, 0.0625);
@@ -121,12 +118,10 @@ void OnNoteOn(byte channel, byte note, byte velocity) {
 
     float fund = note2freq(note);
 
-    Serial.print(voices.Available(), DEC);
     if (voices.Available() == kNumVoices) {
         perc.frequency(2*fund);
         // Compensate for frequency response: normalize to highest MIDI freq.
         perc.amplitude(log2(4186.0)/log2(fund));
-        percEnvelope.noteOn();
     }
   
     voice_t voice = voices.NoteOn(note);
