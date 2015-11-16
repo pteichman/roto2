@@ -50,79 +50,45 @@ void DrawbarOsc::Rebuild(void) {
     // 9 drawbars accumulate together for 4 more bits. So shift 12 at
     // the end to get back to 16 bits.
 
-    // Most of the Hammond partial frequencies are integer multiples
-    // of the fundamental, so we can index the desired values
-    // directly. The first two drawbars (0.5f and 1.5f), on the other
-    // hand, need interpolation.
-    //
-    // Use a 32-bit phase index and increment. The high 8 bits of
-    // index will be our sine index; the next 16 will be the scale for
-    // interpolation.
-    uint32_t index=0, scale=0;
-    uint32_t phase=0;
-    int32_t v1, v2, v3;
+    // First drawbar: sub octave (220Hz @ A4)
     for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        index = phase >> 24;
-        scale = (phase >> 8) & 0xFFFF;
-
-        // Linear interpolation between v1 and v2.
-        v1 = AudioWaveformSine[index] * (0xFFFF - scale);
-        v2 = AudioWaveformSine[index+1] * scale;
-        v3 = (v1 + v2) >> 16;
-
-        Buf[i] = v3 * drawbars[0];
-
-        // Incrementing with 0x1000000 will get us the fundamental
-        // frequency in the high 8 bits of phase; there are three
-        // fundamental cycles per one of these, so use 0x1000000/3.
-        phase += 0x555555;
+        Buf[i] = AudioWaveformSine[i & 0xff] * drawbars[0];
     }
 
     for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        index = phase >> 24;
-        scale = (phase >> 8) & 0xFFFF;
-
-        // Linear interpolation between v1 and v2.
-        v1 = AudioWaveformSine[index] * (0xFFFF - scale);
-        v2 = AudioWaveformSine[index+1] * scale;
-        v3 = (v1 + v2) >> 16;
-
-        Buf[i] += v3 * drawbars[1];
-
-        phase += 0x1555555;
-    }
-
-    // Three cycles of the fundamental frequency.
-    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        Buf[i] += AudioWaveformSine[i & 0xff] * drawbars[2];
+        Buf[i] += AudioWaveformSine[3*i & 0xff] * drawbars[1];
     }
 
     for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        Buf[i] += AudioWaveformSine[2*i & 0xff] * drawbars[3];
+        Buf[i] += AudioWaveformSine[2*i & 0xff] * drawbars[2];
     }
 
     for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        Buf[i] += AudioWaveformSine[3*i & 0xff] * drawbars[4];
+        Buf[i] += AudioWaveformSine[4*i & 0xff] * drawbars[3];
     }
 
     for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        Buf[i] += AudioWaveformSine[4*i & 0xff] * drawbars[5];
+        Buf[i] += AudioWaveformSine[6*i & 0xff] * drawbars[4];
     }
 
     for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        Buf[i] += AudioWaveformSine[5*i & 0xff] * drawbars[6];
+        Buf[i] += AudioWaveformSine[8*i & 0xff] * drawbars[5];
     }
 
     for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        Buf[i] += AudioWaveformSine[6*i & 0xff] * drawbars[7];
+        Buf[i] += AudioWaveformSine[10*i & 0xff] * drawbars[6];
     }
 
     for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        Buf[i] += AudioWaveformSine[8*i & 0xff] * drawbars[8];
+        Buf[i] += AudioWaveformSine[12*i & 0xff] * drawbars[7];
     }
 
     for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        DrawbarWave[i] = Buf[i] >> 12;
+        Buf[i] += AudioWaveformSine[16*i & 0xff] * drawbars[8];
+    }
+
+    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
+        DrawbarWave[i] = Buf[i] >> 10;
     }
     DrawbarWave[DRAWBAR_WAVETABLE_LENGTH] = DrawbarWave[0];
 }
