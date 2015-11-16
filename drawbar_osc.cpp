@@ -3,7 +3,6 @@
 #include "drawbar_osc.h"
 
 int16_t DrawbarWave[DRAWBAR_WAVETABLE_LENGTH+1];
-int32_t Buf[DRAWBAR_WAVETABLE_LENGTH+1];
 
 void DrawbarOsc::update(void) {
     audio_block_t *block;
@@ -46,49 +45,28 @@ void DrawbarOsc::update(void) {
 }
 
 void DrawbarOsc::Rebuild(void) {
+    uint32_t buf[DRAWBAR_WAVETABLE_LENGTH+1];
+
     // Accumulating 24 bits per drawbar (16 sine * 8 volume), then the
     // 9 drawbars accumulate together for 4 more bits. So shift 12 at
     // the end to get back to 16 bits.
 
     // First drawbar: sub octave (220Hz @ A4)
     for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        Buf[i] = AudioWaveformSine[i & 0xff] * drawbars[0];
+        buf[i] = AudioWaveformSine[i & 0xff] * drawbars[0]
+            + AudioWaveformSine[3*i & 0xff] * drawbars[1]
+            + AudioWaveformSine[2*i & 0xff] * drawbars[2]
+            + AudioWaveformSine[4*i & 0xff] * drawbars[3]
+            + AudioWaveformSine[6*i & 0xff] * drawbars[4]
+            + AudioWaveformSine[8*i & 0xff] * drawbars[5]
+            + AudioWaveformSine[10*i & 0xff] * drawbars[6]
+            + AudioWaveformSine[12*i & 0xff] * drawbars[7]
+            + AudioWaveformSine[16*i & 0xff] * drawbars[8];
     }
 
     for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        Buf[i] += AudioWaveformSine[3*i & 0xff] * drawbars[1];
+        DrawbarWave[i] = buf[i] >> 10;
     }
 
-    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        Buf[i] += AudioWaveformSine[2*i & 0xff] * drawbars[2];
-    }
-
-    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        Buf[i] += AudioWaveformSine[4*i & 0xff] * drawbars[3];
-    }
-
-    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        Buf[i] += AudioWaveformSine[6*i & 0xff] * drawbars[4];
-    }
-
-    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        Buf[i] += AudioWaveformSine[8*i & 0xff] * drawbars[5];
-    }
-
-    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        Buf[i] += AudioWaveformSine[10*i & 0xff] * drawbars[6];
-    }
-
-    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        Buf[i] += AudioWaveformSine[12*i & 0xff] * drawbars[7];
-    }
-
-    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        Buf[i] += AudioWaveformSine[16*i & 0xff] * drawbars[8];
-    }
-
-    for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-        DrawbarWave[i] = Buf[i] >> 10;
-    }
     DrawbarWave[DRAWBAR_WAVETABLE_LENGTH] = DrawbarWave[0];
 }
