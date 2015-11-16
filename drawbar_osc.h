@@ -79,7 +79,7 @@ class DrawbarOsc : public AudioStream {
         } else if (freq > AUDIO_SAMPLE_RATE_EXACT / 2) {
             freq = AUDIO_SAMPLE_RATE_EXACT / 2;
         }
-        tone_incr = freq * (0x10000000LL/AUDIO_SAMPLE_RATE_EXACT) + 0.5;
+        tone_incr = freq * (0x20000000LL/AUDIO_SAMPLE_RATE_EXACT) + 0.5;
     }
 
     void Amplitude(float v) {
