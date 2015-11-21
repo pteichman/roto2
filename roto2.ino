@@ -7,6 +7,7 @@
 #include <SerialFlash.h>
 
 #include "drawbar_osc.h"
+#include "vibrato.h"
 #include "voice_allocator.h"
 
 // GUItool: begin automatically generated code
@@ -14,15 +15,16 @@ DrawbarOsc               osc1;
 DrawbarOsc               osc2;
 DrawbarOsc               osc3;
 DrawbarOsc               osc4;
-AudioEffectEnvelope      envelope1;      //xy=591,90
-AudioEffectEnvelope      envelope2;      //xy=591,208
-AudioEffectEnvelope      envelope3;      //xy=593,326
-AudioEffectEnvelope      envelope4;      //xy=596,444
+AudioEffectEnvelope      envelope1;
+AudioEffectEnvelope      envelope2;
+AudioEffectEnvelope      envelope3;
+AudioEffectEnvelope      envelope4;
 AudioSynthWaveformSine   perc;
 AudioEffectEnvelope      percEnvelope;
-AudioMixer4              mixer1;
-AudioMixer4              mixer2;
-AudioOutputI2S           i2s1;           //xy=887,273
+Vibrato                  vibrato;
+AudioMixer4              mixer1; // Mixes voices
+AudioMixer4              mixer2; // Mixes voices with percussion
+AudioOutputI2S           i2s1;
 AudioConnection          patchCord17(osc1, envelope1);
 AudioConnection          patchCord18(osc2, envelope2);
 AudioConnection          patchCord19(osc3, envelope3);
@@ -34,9 +36,10 @@ AudioConnection          patchCord24(envelope3, 0, mixer1, 2);
 AudioConnection          patchCord25(envelope4, 0, mixer1, 3);
 AudioConnection          patchCord26(mixer1, 0, mixer2, 0);
 AudioConnection          patchCord27(percEnvelope, 0, mixer2, 1);
-AudioConnection          patchCord28(mixer2, 0, i2s1, 0);
-AudioConnection          patchCord29(mixer2, 0, i2s1, 1);
-AudioControlSGTL5000     audioShield;     //xy=132,494
+AudioConnection          patchCord28(mixer2, 0, vibrato, 0);
+AudioConnection          patchCord30(vibrato, 0, i2s1, 0);
+AudioConnection          patchCord31(vibrato, 0, i2s1, 1);
+AudioControlSGTL5000     audioShield;
 // GUItool: end automatically generated code
 
 VoiceAllocator voices;
@@ -153,6 +156,17 @@ void OnNoteOff(byte channel, byte note, byte velocity) {
     Serial.print(note, DEC);
     Serial.print(", velocity=");
     Serial.print(velocity, DEC);
+    Serial.println();
+
+    Serial.print("all=");
+    Serial.print(AudioProcessorUsage());
+    Serial.print(",");
+    Serial.print(AudioProcessorUsageMax());
+    Serial.print("    ");
+    Serial.print("Memory: ");
+    Serial.print(AudioMemoryUsage());
+    Serial.print(",");
+    Serial.print(AudioMemoryUsageMax());
     Serial.println();
 
     voice_t voice = voices.NoteOff(note);
