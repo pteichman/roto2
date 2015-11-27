@@ -68,7 +68,7 @@ class DrawbarOsc : public AudioStream {
         } else if (v > 1.0) {
             v = 1.0;
         }
-        drawbars[n] = (uint8_t)(256*v);
+        drawbars[n] = (uint8_t)(255*v);
 
         Rebuild();
     }
