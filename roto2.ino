@@ -57,7 +57,7 @@ void setup() {
     initVoice(2);
     initVoice(3);
 
-    osc1.AllDrawbars(0x888800000);
+    osc1.AllDrawbars(0x888800000L);
     mixer1.gain(0, 0.25);
     mixer1.gain(1, 0.25);
     mixer1.gain(2, 0.25);
@@ -86,19 +86,19 @@ void loop() {
 void initVoice(byte voice) {
     switch (voice) {
     case 0:
-        osc1.Begin(0.0, 1.0, 0x000000000);
+        osc1.Begin(0.0, 1.0, 0x000000000L);
         initEnvelope(&envelope1);
         break;
     case 1:
-        osc2.Begin(0.0, 1.0, 0x000000000);
+        osc2.Begin(0.0, 1.0, 0x000000000L);
         initEnvelope(&envelope2);
         break;
     case 2:
-        osc3.Begin(0.0, 1.0, 0x000000000);
+        osc3.Begin(0.0, 1.0, 0x000000000L);
         initEnvelope(&envelope3);
         break;
     case 3:
-        osc4.Begin(0.0, 1.0, 0x000000000);
+        osc4.Begin(0.0, 1.0, 0x000000000L);
         initEnvelope(&envelope4);
         break;
     }
