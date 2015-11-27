@@ -67,6 +67,8 @@ void setup() {
     percEnvelope.sustain(0.0);
     percEnvelope.decay(80.0);
 
+    vibrato.SetMode(V2);
+
     mixer2.gain(0, 0.5);
     mixer2.gain(1, 0.0625);
 

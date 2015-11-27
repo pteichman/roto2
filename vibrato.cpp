@@ -36,14 +36,20 @@ void Vibrato::update(void) {
 
         // Read the delay line into the output buffer.
 
-        // 7 bits of loc_wp to 1..8; subtract triangle
-        int32_t loc_rp = (loc_wp << 24) - (int32_t)(triangle(loc_phase) >> 1);
+        // 7 bits of loc_wp to 1..8; subtract triangle. This gives 5
+        // bits of sway on a 7 bit counter.
+        int32_t loc_rp = (loc_wp << 24) - (int32_t)(triangle(loc_phase) >> depth);
 
         int16_t pos = loc_rp >> 24;
         int16_t a = buf[pos & 0x7f];
-        int16_t b = buf[(pos+1) & 0x7f];
+        int16_t b = buf[++pos & 0x7f];
 
-        out->data[i] = lerp(a, b, (loc_rp >> 8) & 0xFFFF);
+        int16_t val = lerp(a, b, (loc_rp >> 8) & 0xFFFF);
+        if (mix) {
+            val = ((int32_t)val + buf[loc_wp]) >> 1;
+        }
+
+        out->data[i] = val;
 
         loc_phase += 679632;
 

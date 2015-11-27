@@ -15,6 +15,8 @@
 // update() cycle reads the input block, writes it to the ring buffer,
 // and writes phase modulated output.
 
+enum VibratoMode { Off=0, V1, V2, V3, C1, C2, C3 };
+
 class Vibrato : public AudioStream {
  public:
     Vibrato() : AudioStream(1, inputQueueArray) {
@@ -29,6 +31,37 @@ class Vibrato : public AudioStream {
         }
 
         scan_phase = 0;
+    }
+
+    void SetMode(VibratoMode mode) {
+        switch (mode) {
+        case V1:
+            depth = 3;
+            mix = 0;
+            break;
+        case V2:
+            depth = 2;
+            mix = 0;
+            break;
+        case V3:
+            depth = 1;
+            mix = 0;
+            break;
+        case C1:
+            depth = 3;
+            mix = 1;
+            break;
+        case C2:
+            depth = 2;
+            mix = 1;
+            break;
+        case C3:
+            depth = 1;
+            mix = 1;
+            break;
+        default:
+            depth = 8;
+        }
     }
 
     void update(void);
@@ -48,6 +81,10 @@ class Vibrato : public AudioStream {
     // The write pointer is 34 samples ahead, so use 6 bits (5 + sign)
     // as the position modifier so reads never outrun writes.
     uint32_t scan_phase;
+
+    // Depth of triangle scanner; 1..7, higher is *less* vibrato.
+    int depth;
+    int mix;
 };
 
 #endif
