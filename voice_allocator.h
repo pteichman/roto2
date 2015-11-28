@@ -31,7 +31,7 @@ class VoiceAllocator
     int Available() {
         int ret = 0;
         for (int i=0; i<kNumVoices; i++) {
-            if (voices_[i] == kNoVoice) {
+            if (voices_[i] >= kNoVoice) {
                 ret++;
             }
         }

@@ -38,10 +38,10 @@ AudioConnection          patchCord17(osc1, envelope1);
 AudioConnection          patchCord18(osc2, envelope2);
 AudioConnection          patchCord19(osc3, envelope3);
 AudioConnection          patchCord20(osc4, envelope4);
-AudioConnection          patchCord21(osc5, envelope1);
-AudioConnection          patchCord22(osc6, envelope2);
-AudioConnection          patchCord23(osc7, envelope3);
-AudioConnection          patchCord24(osc8, envelope4);
+AudioConnection          patchCord21(osc5, envelope5);
+AudioConnection          patchCord22(osc6, envelope6);
+AudioConnection          patchCord23(osc7, envelope7);
+AudioConnection          patchCord24(osc8, envelope8);
 AudioConnection          patchCord25(perc, percEnvelope);
 AudioConnection          patchCord26(envelope1, 0, mixer1, 0);
 AudioConnection          patchCord27(envelope2, 0, mixer1, 1);
@@ -60,6 +60,7 @@ AudioConnection          patchCord39(vibrato, 0, i2s1, 1);
 AudioControlSGTL5000     audioShield;
 // GUItool: end automatically generated code
 
+DrawbarWavetable wav;
 VoiceAllocator voices;
 
 void setup() {
@@ -79,7 +80,9 @@ void setup() {
     initVoice(6);
     initVoice(7);
 
-    osc1.AllDrawbars(0x888800000L);
+    wav.Init();
+    wav.AllDrawbars(0x888800001L);
+
     mixer1.gain(0, 0.25);
     mixer1.gain(1, 0.25);
     mixer1.gain(2, 0.25);
@@ -89,14 +92,14 @@ void setup() {
     mixer2.gain(2, 0.25);
     mixer2.gain(3, 0.25);
 
-    percEnvelope.attack(10.0);
+    percEnvelope.attack(20.0);
     percEnvelope.sustain(0.0);
     percEnvelope.decay(80.0);
 
-    vibrato.SetMode(V2);
+    vibrato.SetMode(C2);
 
-    mixer3.gain(0, 0.25);
-    mixer3.gain(1, 0.25);
+    mixer3.gain(0, 1.0);
+    mixer3.gain(1, 1.0);
     mixer3.gain(2, 0.0625);
 
     usbMIDI.setHandleNoteOff(OnNoteOff);
@@ -115,35 +118,35 @@ void loop() {
 void initVoice(byte voice) {
     switch (voice) {
     case 0:
-        osc1.Begin(0.0, 1.0, 0x000000000L);
+        osc1.Begin(0.0, 1.0, &wav);
         initEnvelope(&envelope1);
         break;
     case 1:
-        osc2.Begin(0.0, 1.0, 0x000000000L);
+        osc2.Begin(0.0, 1.0, &wav);
         initEnvelope(&envelope2);
         break;
     case 2:
-        osc3.Begin(0.0, 1.0, 0x000000000L);
+        osc3.Begin(0.0, 1.0, &wav);
         initEnvelope(&envelope3);
         break;
     case 3:
-        osc4.Begin(0.0, 1.0, 0x000000000L);
+        osc4.Begin(0.0, 1.0, &wav);
         initEnvelope(&envelope4);
         break;
     case 4:
-        osc5.Begin(0.0, 1.0, 0x000000000L);
+        osc5.Begin(0.0, 1.0, &wav);
         initEnvelope(&envelope5);
         break;
     case 5:
-        osc6.Begin(0.0, 1.0, 0x000000000L);
+        osc6.Begin(0.0, 1.0, &wav);
         initEnvelope(&envelope6);
         break;
     case 6:
-        osc7.Begin(0.0, 1.0, 0x000000000L);
+        osc7.Begin(0.0, 1.0, &wav);
         initEnvelope(&envelope7);
         break;
     case 7:
-        osc8.Begin(0.0, 1.0, 0x000000000L);
+        osc8.Begin(0.0, 1.0, &wav);
         initEnvelope(&envelope8);
         break;
     }
@@ -170,12 +173,10 @@ void OnNoteOn(byte channel, byte note, byte velocity) {
         perc.frequency(2*fund);
         // Compensate for frequency response: normalize to highest MIDI freq.
         perc.amplitude(log2(4186.0)/log2(fund));
+        // percEnvelope.noteOn();
     }
   
     voice_t voice = voices.NoteOn(note);
-    Serial.print("Voice=");
-    Serial.print(voice, DEC);
-    Serial.println();
 
     switch (voice) {
     case 0:
@@ -284,7 +285,7 @@ void OnControlChange(byte channel, byte control, byte value) {
     if (control >= 16 && control < 25) {
         int drawbar = control - 16;
         float val = (float)value / 127.0;
-        osc1.Drawbar(drawbar, val);
+        wav.Drawbar(drawbar, val);
     }
 }
 

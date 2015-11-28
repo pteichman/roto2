@@ -5,8 +5,7 @@
 
 #include <Audio.h>
 
-#define DRAWBAR_WAVETABLE_LENGTH (768)
-extern int16_t DrawbarWave[DRAWBAR_WAVETABLE_LENGTH+1];
+#include "drawbar_wavetable.h"
 
 class DrawbarOsc : public AudioStream {
  public:
@@ -16,61 +15,14 @@ class DrawbarOsc : public AudioStream {
     void Init() {
         tone_phase = 0;
         tone_incr = 0;
-
         amp = 0;
-        for (int i=0; i<9; i++) {
-            drawbars[i] = 0;
-        }
-
-        for (int i=0; i<DRAWBAR_WAVETABLE_LENGTH; i++) {
-            DrawbarWave[i] = 0;
-        }
-        DrawbarWave[DRAWBAR_WAVETABLE_LENGTH] = DrawbarWave[0];
     }
 
-    void Begin(float freq, float amp, long long harmonics) {
+    void Begin(float freq, float amp, DrawbarWavetable *wav) {
         Init();
         Fundamental(freq);
         Amplitude(amp);
-        AllDrawbars(harmonics);
-    }
-
-    // AllDrawbars takes a long long, so that drawbar settings can be
-    // made inline. Each nibble turns into a single drawbar value, so
-    // e.g. 0x888800000 sets the first four drawbars to 8 and the rest
-    // to zero.
-    void AllDrawbars(long long harmonics) {
-        drawbars[8] = 28*(harmonics & 0xf);
-        harmonics >>= 4;
-        drawbars[7] = 28*(harmonics & 0xf);
-        harmonics >>= 4;
-        drawbars[6] = 28*(harmonics & 0xf);
-        harmonics >>= 4;
-        drawbars[5] = 28*(harmonics & 0xf);
-        harmonics >>= 4;
-        drawbars[4] = 28*(harmonics & 0xf);
-        harmonics >>= 4;
-        drawbars[3] = 28*(harmonics & 0xf);
-        harmonics >>= 4;
-        drawbars[2] = 28*(harmonics & 0xf);
-        harmonics >>= 4;
-        drawbars[1] = 28*(harmonics & 0xf);
-        harmonics >>= 4;
-        drawbars[0] = 28*(harmonics & 0xf);
-
-        Serial.println("Rebuilding drawbars");
-        Rebuild();
-    }
-
-    void Drawbar(int n, float v) {
-        if (v < 0.0) {
-            v = 0.0;
-        } else if (v > 1.0) {
-            v = 1.0;
-        }
-        drawbars[n] = (uint8_t)(255*v);
-
-        Rebuild();
+        wav_ = wav;
     }
 
     void Fundamental(float freq) {
@@ -99,13 +51,12 @@ class DrawbarOsc : public AudioStream {
     void update(void);
 
  private:
-    uint8_t drawbars[9];
     uint16_t amp;
     uint32_t tone_phase;
     uint32_t tone_width;
     uint32_t tone_incr;
 
-    virtual void Rebuild(void);
+    DrawbarWavetable *wav_;
 };
 
 #endif
