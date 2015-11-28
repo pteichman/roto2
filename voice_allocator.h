@@ -6,7 +6,7 @@
 typedef uint8_t voice_t;
 
 const uint8_t kNumVoices = 8;
-const uint8_t kNoVoice = 0xFF;
+const uint8_t kNoVoice = kNumVoices;
 
 class VoiceAllocator
 {
@@ -39,9 +39,9 @@ class VoiceAllocator
     }
 
  private:
-    uint8_t tick_;
-    voice_t voices_[kNumVoices];
-    uint8_t lru_[kNumVoices];
+    volatile uint32_t tick_;
+    uint8_t voices_[kNumVoices];
+    uint32_t lru_[kNumVoices];
 };
 
 #endif
