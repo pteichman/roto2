@@ -5,7 +5,7 @@
 
 typedef uint8_t voice_t;
 
-const uint8_t kNumVoices = 4;
+const uint8_t kNumVoices = 8;
 const uint8_t kNoVoice = 0xFF;
 
 class VoiceAllocator

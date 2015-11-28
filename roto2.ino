@@ -15,30 +15,48 @@ DrawbarOsc               osc1;
 DrawbarOsc               osc2;
 DrawbarOsc               osc3;
 DrawbarOsc               osc4;
+DrawbarOsc               osc5;
+DrawbarOsc               osc6;
+DrawbarOsc               osc7;
+DrawbarOsc               osc8;
 AudioEffectEnvelope      envelope1;
 AudioEffectEnvelope      envelope2;
 AudioEffectEnvelope      envelope3;
 AudioEffectEnvelope      envelope4;
+AudioEffectEnvelope      envelope5;
+AudioEffectEnvelope      envelope6;
+AudioEffectEnvelope      envelope7;
+AudioEffectEnvelope      envelope8;
 AudioSynthWaveformSine   perc;
 AudioEffectEnvelope      percEnvelope;
 Vibrato                  vibrato;
-AudioMixer4              mixer1; // Mixes voices
-AudioMixer4              mixer2; // Mixes voices with percussion
+AudioMixer4              mixer1; // Mixes voices 1-4
+AudioMixer4              mixer2; // Mixes voices 5-8
+AudioMixer4              mixer3; // Mixes voices with percussion
 AudioOutputI2S           i2s1;
 AudioConnection          patchCord17(osc1, envelope1);
 AudioConnection          patchCord18(osc2, envelope2);
 AudioConnection          patchCord19(osc3, envelope3);
 AudioConnection          patchCord20(osc4, envelope4);
-AudioConnection          patchCord21(perc, percEnvelope);
-AudioConnection          patchCord22(envelope1, 0, mixer1, 0);
-AudioConnection          patchCord23(envelope2, 0, mixer1, 1);
-AudioConnection          patchCord24(envelope3, 0, mixer1, 2);
-AudioConnection          patchCord25(envelope4, 0, mixer1, 3);
-AudioConnection          patchCord26(mixer1, 0, mixer2, 0);
-AudioConnection          patchCord27(percEnvelope, 0, mixer2, 1);
-AudioConnection          patchCord28(mixer2, 0, vibrato, 0);
-AudioConnection          patchCord30(vibrato, 0, i2s1, 0);
-AudioConnection          patchCord31(vibrato, 0, i2s1, 1);
+AudioConnection          patchCord21(osc5, envelope1);
+AudioConnection          patchCord22(osc6, envelope2);
+AudioConnection          patchCord23(osc7, envelope3);
+AudioConnection          patchCord24(osc8, envelope4);
+AudioConnection          patchCord25(perc, percEnvelope);
+AudioConnection          patchCord26(envelope1, 0, mixer1, 0);
+AudioConnection          patchCord27(envelope2, 0, mixer1, 1);
+AudioConnection          patchCord28(envelope3, 0, mixer1, 2);
+AudioConnection          patchCord29(envelope4, 0, mixer1, 3);
+AudioConnection          patchCord30(envelope5, 0, mixer2, 0);
+AudioConnection          patchCord31(envelope6, 0, mixer2, 1);
+AudioConnection          patchCord32(envelope7, 0, mixer2, 2);
+AudioConnection          patchCord33(envelope8, 0, mixer2, 3);
+AudioConnection          patchCord34(mixer1, 0, mixer3, 0);
+AudioConnection          patchCord35(mixer2, 0, mixer3, 1);
+AudioConnection          patchCord36(percEnvelope, 0, mixer3, 2);
+AudioConnection          patchCord37(mixer3, 0, vibrato, 0);
+AudioConnection          patchCord38(vibrato, 0, i2s1, 0);
+AudioConnection          patchCord39(vibrato, 0, i2s1, 1);
 AudioControlSGTL5000     audioShield;
 // GUItool: end automatically generated code
 
@@ -56,12 +74,20 @@ void setup() {
     initVoice(1);
     initVoice(2);
     initVoice(3);
+    initVoice(4);
+    initVoice(5);
+    initVoice(6);
+    initVoice(7);
 
     osc1.AllDrawbars(0x888800000L);
     mixer1.gain(0, 0.25);
     mixer1.gain(1, 0.25);
     mixer1.gain(2, 0.25);
     mixer1.gain(3, 0.25);
+    mixer2.gain(0, 0.25);
+    mixer2.gain(1, 0.25);
+    mixer2.gain(2, 0.25);
+    mixer2.gain(3, 0.25);
 
     percEnvelope.attack(10.0);
     percEnvelope.sustain(0.0);
@@ -69,8 +95,9 @@ void setup() {
 
     vibrato.SetMode(V2);
 
-    mixer2.gain(0, 0.5);
-    mixer2.gain(1, 0.0625);
+    mixer3.gain(0, 0.25);
+    mixer3.gain(1, 0.25);
+    mixer3.gain(2, 0.0625);
 
     usbMIDI.setHandleNoteOff(OnNoteOff);
     usbMIDI.setHandleNoteOn(OnNoteOn);
@@ -103,6 +130,22 @@ void initVoice(byte voice) {
         osc4.Begin(0.0, 1.0, 0x000000000L);
         initEnvelope(&envelope4);
         break;
+    case 4:
+        osc5.Begin(0.0, 1.0, 0x000000000L);
+        initEnvelope(&envelope5);
+        break;
+    case 5:
+        osc6.Begin(0.0, 1.0, 0x000000000L);
+        initEnvelope(&envelope6);
+        break;
+    case 6:
+        osc7.Begin(0.0, 1.0, 0x000000000L);
+        initEnvelope(&envelope7);
+        break;
+    case 7:
+        osc8.Begin(0.0, 1.0, 0x000000000L);
+        initEnvelope(&envelope8);
+        break;
     }
 }
 
@@ -130,6 +173,9 @@ void OnNoteOn(byte channel, byte note, byte velocity) {
     }
   
     voice_t voice = voices.NoteOn(note);
+    Serial.print("Voice=");
+    Serial.print(voice, DEC);
+    Serial.println();
 
     switch (voice) {
     case 0:
@@ -148,6 +194,22 @@ void OnNoteOn(byte channel, byte note, byte velocity) {
         osc4.Fundamental(fund);
         envelope4.noteOn();
         break;
+    case 4:
+        osc5.Fundamental(fund);
+        envelope5.noteOn();
+        break;
+    case 5:
+        osc6.Fundamental(fund);
+        envelope6.noteOn();
+        break;
+    case 6:
+        osc7.Fundamental(fund);
+        envelope7.noteOn();
+        break;
+    case 7:
+        osc8.Fundamental(fund);
+        envelope8.noteOn();
+        break;
     }
 }
 
@@ -160,7 +222,7 @@ void OnNoteOff(byte channel, byte note, byte velocity) {
     Serial.print(velocity, DEC);
     Serial.println();
 
-    Serial.print("all=");
+    Serial.print("CPU=");
     Serial.print(AudioProcessorUsage());
     Serial.print(",");
     Serial.print(AudioProcessorUsageMax());
@@ -184,6 +246,18 @@ void OnNoteOff(byte channel, byte note, byte velocity) {
         break;
     case 3:
         envelope4.noteOff();
+        break;
+    case 4:
+        envelope5.noteOff();
+        break;
+    case 5:
+        envelope6.noteOff();
+        break;
+    case 6:
+        envelope7.noteOff();
+        break;
+    case 7:
+        envelope8.noteOff();
         break;
     }
 }
