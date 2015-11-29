@@ -33,6 +33,7 @@ Vibrato                  vibrato;
 AudioMixer4              mixer1; // Mixes voices 1-4
 AudioMixer4              mixer2; // Mixes voices 5-8
 AudioMixer4              mixer3; // Mixes voices with percussion
+AudioFilterBiquad        antialias;
 AudioOutputI2S           i2s1;
 AudioConnection          patchCord17(osc1, envelope1);
 AudioConnection          patchCord18(osc2, envelope2);
@@ -55,8 +56,9 @@ AudioConnection          patchCord34(mixer1, 0, mixer3, 0);
 AudioConnection          patchCord35(mixer2, 0, mixer3, 1);
 AudioConnection          patchCord36(percEnvelope, 0, mixer3, 2);
 AudioConnection          patchCord37(mixer3, 0, vibrato, 0);
-AudioConnection          patchCord38(vibrato, 0, i2s1, 0);
-AudioConnection          patchCord39(vibrato, 0, i2s1, 1);
+AudioConnection          patchCord38(vibrato, 0, antialias, 0);
+AudioConnection          patchCord39(antialias, 0, i2s1, 0);
+AudioConnection          patchCord40(antialias, 0, i2s1, 1);
 AudioControlSGTL5000     audioShield;
 // GUItool: end automatically generated code
 
@@ -101,6 +103,8 @@ void setup() {
     mixer3.gain(0, 1.0);
     mixer3.gain(1, 1.0);
     mixer3.gain(2, 0.0625);
+
+    antialias.setLowpass(0, 6000, 0.707);
 
     usbMIDI.setHandleNoteOff(OnNoteOff);
     usbMIDI.setHandleNoteOn(OnNoteOn);
